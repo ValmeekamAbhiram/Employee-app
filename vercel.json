@@ -8,16 +8,12 @@
     },
     {
       "src": "api/index.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": { "maxDuration": 60 }
     }
   ],
   "rewrites": [
     { "source": "/employee-api/(.*)", "destination": "/api" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }
