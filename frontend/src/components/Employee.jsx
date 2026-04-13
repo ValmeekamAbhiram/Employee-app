@@ -17,7 +17,7 @@ function Employee() {
   }
 
   return (
-    <div style={{ padding: '2.5rem 0' }} className="animate-in">
+    <div style={{ padding: '2.5rem 0' }}>
       <div className="glass-card profile-card" style={{ padding: '2rem' }}>
         <div className="profile-header">
           <div className="profile-avatar">
