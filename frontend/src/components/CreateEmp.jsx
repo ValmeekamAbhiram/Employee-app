@@ -6,120 +6,76 @@ function CreateEmp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
-  //form submit
-  const onFormSubmit = async (newEmpObj) => {
+  const onFormSubmit = async (data) => {
     try {
       setLoading(true);
-      //make HTTP POST req
-      let res = await fetch("http://localhost:4000/employee-api/employee", {
+      setError("");
+      const res = await fetch("/employee-api/employee", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newEmpObj),
+        body: JSON.stringify(data),
       });
-
       if (res.status === 201) {
-        //navigate to employees component programatically
         navigate("/list");
       } else {
-        let errorRes = await res.json();
-        console.log("error responce is ", errorRes);
-        throw new Error(errorRes.reason);
+        const err = await res.json();
+        throw new Error(err.reason || "Something went wrong");
       }
     } catch (err) {
-      console.log("err in catch", err);
-      //deal with err
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  console.log(error);
-
   if (loading) {
-    return <p className="text-center text-4xl">Loading....</p>;
+    return (
+      <div className="loading-page">
+        <div className="spinner"></div>
+      </div>
+    );
   }
-  if (error) {
-    return <p className="text-red-500 text-center text-3xl">{error}</p>;
-  }
+
   return (
-    <div className="flex justify-center py-10">
-      <div className="glass-card p-10 w-full max-w-lg">
-        <h2 className="text-3xl font-bold mb-2 text-center text-white">Add New Talent</h2>
-        <p className="text-slate-400 text-center mb-10">Fill in the details to expand your team.</p>
-        
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl mb-6 text-sm">
-            {error}
-          </div>
-        )}
+    <div className="form-page">
+      <div className="form-container glass-card" style={{ padding: '2rem' }}>
+        <h2 className="form-title">Add Employee</h2>
+        <p className="form-subtitle">Fill in the details below.</p>
 
-        <form onSubmit={handleSubmit(onEmployeeSubmit)} className="space-y-6">
+        {error && <div className="form-error">{error}</div>}
+
+        <form onSubmit={handleSubmit(onFormSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              placeholder="John Doe"
-              {...register("name", { required: "Name is required" })}
-            />
-            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
+            <label htmlFor="name">Name</label>
+            <input type="text" id="name" placeholder="John Doe" {...register("name", { required: "Required" })} />
+            {errors.name && <p className="field-error">{errors.name.message}</p>}
           </div>
-
           <div>
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              placeholder="john@company.com"
-              {...register("email", { required: "Email is required" })}
-            />
-            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
+            <label htmlFor="email">Email</label>
+            <input type="email" id="email" placeholder="john@company.com" {...register("email", { required: "Required" })} />
+            {errors.email && <p className="field-error">{errors.email.message}</p>}
           </div>
-
           <div>
-            <label htmlFor="mobile">Mobile Number</label>
-            <input
-              type="text"
-              id="mobile"
-              placeholder="+1 (555) 000-0000"
-              {...register("mobile", { required: "Mobile number is required" })}
-            />
-            {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile.message}</p>}
+            <label htmlFor="mobile">Mobile</label>
+            <input type="text" id="mobile" placeholder="+1 555 000 0000" {...register("mobile", { required: "Required" })} />
+            {errors.mobile && <p className="field-error">{errors.mobile.message}</p>}
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
+          <div className="form-row">
             <div>
               <label htmlFor="designation">Designation</label>
-              <input
-                type="text"
-                id="designation"
-                placeholder="Software Engineer"
-                {...register("designation", { required: "Designation is required" })}
-              />
-              {errors.designation && <p className="text-red-400 text-xs mt-1">{errors.designation.message}</p>}
+              <input type="text" id="designation" placeholder="Software Engineer" {...register("designation", { required: "Required" })} />
+              {errors.designation && <p className="field-error">{errors.designation.message}</p>}
             </div>
             <div>
               <label htmlFor="companyName">Company</label>
-              <input
-                type="text"
-                id="companyName"
-                placeholder="TechCorp"
-                {...register("companyName", { required: "Company name is required" })}
-              />
-              {errors.companyName && <p className="text-red-400 text-xs mt-1">{errors.companyName.message}</p>}
+              <input type="text" id="companyName" placeholder="TechCorp" {...register("companyName", { required: "Required" })} />
+              {errors.companyName && <p className="field-error">{errors.companyName.message}</p>}
             </div>
           </div>
-
-          <button type="submit" className="btn-primary w-full mt-4" disabled={loading}>
-            {loading ? "Onboarding..." : "Add Employee"}
+          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.25rem' }}>
+            Add Employee
           </button>
         </form>
       </div>

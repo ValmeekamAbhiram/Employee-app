@@ -1,112 +1,93 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from "react-hook-form";
-import { useLocation } from 'react-router'
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import axios from 'axios'
+import { useLocation, useNavigate } from 'react-router'
 
 function EditEmployee() {
-  const {
-      register,
-      handleSubmit,
-      formState: { errors },
-      setValue
-    } = useForm();
-
-  const navigate=useNavigate()
-
-  //get empObj from navigate hook
   const { state } = useLocation();
-  const { register, handleSubmit, formState: { errors } } = useForm({
-    defaultValues: state
-  });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: state });
 
-  const onEmployeeEditSubmit = async (empObj) => {
+  const onSubmit = async (data) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.put(`/employee-api/employee/${state._id}`, empObj);
-      if (res.status === 200) {
+      const res = await fetch(`/employee-api/employee/${state._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
         navigate("/list");
+      } else {
+        const err = await res.json();
+        throw new Error(err.reason || "Update failed");
       }
     } catch (err) {
-      console.error(err);
-      setError("Failed to update employee. Please try again.");
+      setError("Failed to update. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  if (!state) {
+    return (
+      <div className="loading-page">
+        <div className="glass-card" style={{ padding: '2.5rem', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-dim)', marginBottom: '1rem' }}>No employee data to edit.</p>
+          <button onClick={() => navigate("/list")} className="btn-primary">Back to Employee List</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-        <form onSubmit={handleSubmit(onEmployeeEditSubmit)} className="space-y-6">
-          <div>
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              {...register("name", { required: "Name is required" })}
-            />
-            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
-          </div>
+    <div className="form-page">
+      <div className="form-container glass-card" style={{ padding: '2rem' }}>
+        <h2 className="form-title">Edit Employee</h2>
+        <p className="form-subtitle">Update details for {state.name}.</p>
 
-          <div>
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              {...register("email", { required: "Email is required" })}
-            />
-            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
-          </div>
+        {error && <div className="form-error">{error}</div>}
 
+        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label htmlFor="mobile">Mobile Number</label>
-            <input
-              type="text"
-              id="mobile"
-              {...register("mobile", { required: "Mobile number is required" })}
-            />
-            {errors.mobile && <p className="text-red-400 text-xs mt-1">{errors.mobile.message}</p>}
+            <label htmlFor="name">Name</label>
+            <input type="text" id="name" {...register("name", { required: "Required" })} />
+            {errors.name && <p className="field-error">{errors.name.message}</p>}
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="email">Email</label>
+            <input type="email" id="email" {...register("email", { required: "Required" })} />
+            {errors.email && <p className="field-error">{errors.email.message}</p>}
+          </div>
+          <div>
+            <label htmlFor="mobile">Mobile</label>
+            <input type="text" id="mobile" {...register("mobile", { required: "Required" })} />
+            {errors.mobile && <p className="field-error">{errors.mobile.message}</p>}
+          </div>
+          <div className="form-row">
             <div>
               <label htmlFor="designation">Designation</label>
-              <input
-                type="text"
-                id="designation"
-                {...register("designation", { required: "Designation is required" })}
-              />
-              {errors.designation && <p className="text-red-400 text-xs mt-1">{errors.designation.message}</p>}
+              <input type="text" id="designation" {...register("designation", { required: "Required" })} />
+              {errors.designation && <p className="field-error">{errors.designation.message}</p>}
             </div>
             <div>
               <label htmlFor="companyName">Company</label>
-              <input
-                type="text"
-                id="companyName"
-                {...register("companyName", { required: "Company name is required" })}
-              />
-              {errors.companyName && <p className="text-red-400 text-xs mt-1">{errors.companyName.message}</p>}
+              <input type="text" id="companyName" {...register("companyName", { required: "Required" })} />
+              {errors.companyName && <p className="field-error">{errors.companyName.message}</p>}
             </div>
           </div>
-
-          <div className="flex gap-4">
-            <button 
-              type="button" 
-              onClick={() => navigate(-1)}
-              className="px-6 py-3 rounded-xl border border-frost-border hover:bg-white/5 transition-all text-white flex-1"
-            >
-              Cancel
-            </button>
-            <button type="submit" className="btn-primary flex-[2]" disabled={loading}>
-              {loading ? "Saving Changes..." : "Update Record"}
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
+            <button type="button" onClick={() => navigate(-1)} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
+            <button type="submit" className="btn-primary" style={{ flex: 2 }} disabled={loading}>
+              {loading ? "Saving…" : "Update"}
             </button>
           </div>
         </form>
-  )
+      </div>
+    </div>
+  );
 }
 
 export default EditEmployee
