@@ -18,14 +18,21 @@ function EditEmployee() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (res.ok) {
-        navigate("/list");
+
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const result = await res.json();
+        if (res.ok) {
+          navigate("/list");
+        } else {
+          throw new Error(result.reason || result.message || "Update failed");
+        }
       } else {
-        const err = await res.json();
-        throw new Error(err.reason || "Update failed");
+        const text = await res.text();
+        throw new Error(`Server Error: ${text.substring(0, 100)}...`);
       }
     } catch (err) {
-      setError("Failed to update. Please try again.");
+      setError(err.message || "Failed to update. Please try again.");
     } finally {
       setLoading(false);
     }

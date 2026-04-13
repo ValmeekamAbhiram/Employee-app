@@ -23,9 +23,13 @@ function ListOfEmps() {
     (async () => {
       try {
         const res = await fetch("/employee-api/employee");
-        if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (res.ok && contentType && contentType.includes("application/json")) {
           const data = await res.json();
-          setEmps(data.payload);
+          setEmps(data.payload || []);
+        } else {
+          const text = await res.text();
+          console.error("Backend error:", text.substring(0, 100));
         }
       } catch (err) {
         console.error("Failed to fetch employees", err);

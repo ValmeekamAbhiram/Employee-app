@@ -17,11 +17,18 @@ function CreateEmp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (res.status === 201) {
-        navigate("/list");
+
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const result = await res.json();
+        if (res.status === 201) {
+          navigate("/list");
+        } else {
+          throw new Error(result.reason || result.message || "Failed to add employee");
+        }
       } else {
-        const err = await res.json();
-        throw new Error(err.reason || "Something went wrong");
+        const text = await res.text();
+        throw new Error(`Server Error: ${text.substring(0, 100)}...`);
       }
     } catch (err) {
       setError(err.message);

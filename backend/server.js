@@ -11,8 +11,16 @@ const app=exp()
 app.use(cors())
 app.use(exp.json())
 
-const port=process.env.PORT||4000
-app.use("/employee-api",employeeApp)
+app.use("/employee-api", employeeApp)
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error("Internal Server Error:", err.stack);
+    res.status(500).json({
+        message: "A server error occurred",
+        reason: err.message
+    });
+});
 
 // Connect to DB and export app
 const connectDB = async () => {
