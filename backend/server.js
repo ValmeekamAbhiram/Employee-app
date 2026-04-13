@@ -1,4 +1,5 @@
 import exp from 'express'
+// Database and server configuration
 import { connect } from 'mongoose'
 import { config } from 'dotenv'
 import { employeeApp } from './APIs/employeeApi.js'
