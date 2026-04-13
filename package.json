@@ -2,9 +2,15 @@
   "name": "mern-mini-root",
   "version": "1.0.0",
   "description": "Root configuration for mern-mini deployment",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node backend/server.js",
-    "build": "cd frontend && npm install && npm run build"
+    "build": "cd frontend && npm install && npm run build",
+    "install-backend": "npm install",
+    "install-frontend": "cd frontend && npm install",
+    "build-frontend": "cd frontend && npm run build"
   },
   "dependencies": {
     "cors": "^2.8.6",
