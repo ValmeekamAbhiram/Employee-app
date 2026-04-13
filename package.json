@@ -1,6 +1,7 @@
 {
   "name": "mern-mini-root",
   "version": "1.0.0",
+  "type": "module",
   "description": "Root configuration for mern-mini deployment",
   "engines": {
     "node": ">=22"
