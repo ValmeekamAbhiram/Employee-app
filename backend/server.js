@@ -10,60 +10,57 @@ const app = exp()
 app.use(cors())
 app.use(exp.json())
 
-// Global DB Connection state (for Serverless)
+// DB Connection Singleton
 let cachedConnection = null
 
 async function connectToDatabase() {
-  if (cachedConnection) {
-    return cachedConnection
-  }
+  if (cachedConnection) return cachedConnection
 
   if (!process.env.DB_URL) {
-    throw new Error('Please define the DB_URL environment variable in your .env or Vercel settings')
+    throw new Error('Missing DB_URL environment variable')
   }
 
-  // Set connect options to handle timeouts better
   const opts = {
     bufferCommands: false,
     serverSelectionTimeoutMS: 5000,
   }
 
-  cachedConnection = connect(process.env.DB_URL, opts).then((mongoose) => {
-    console.log('New DB connection established')
-    return mongoose
-  })
-
+  cachedConnection = await connect(process.env.DB_URL, opts)
   return cachedConnection
 }
 
-// Middleware to ensure DB is connected before any request
+// Middleware to ensure DB connection
 app.use(async (req, res, next) => {
   try {
     await connectToDatabase()
     next()
   } catch (err) {
-    next(err)
+    console.error('Database connection failed:', err)
+    res.status(500).json({ message: 'Database connection failed', reason: err.message })
   }
 })
 
 app.use("/employee-api", employeeApp)
 
-// Global Error Handler
+// Health check
+app.get('/health', (req, res) => res.json({ status: 'ok' }))
+
+// Universal Error Handler
 app.use((err, req, res, next) => {
-  console.error("Server Error:", err)
+  console.error("Internal Server Error:", err)
   res.status(500).json({
     message: "A server error occurred",
-    reason: err.message || "Unknown error"
+    reason: err.message || "Unknown internal error"
   })
 })
 
 const port = process.env.PORT || 4000
 
-// Only listen locally if run directly
-if (process.env.NODE_ENV !== 'production' && import.meta.url === `file://${process.argv[1]}`) {
+// Only listen locally if NODE_ENV is not production
+if (process.env.NODE_ENV !== 'production') {
   connectToDatabase().then(() => {
-    app.listen(port, () => console.log(`local server listening on ${port}`))
-  })
+    app.listen(port, () => console.log(`Server running on port ${port}`))
+  }).catch(err => console.error("Local startup failed:", err))
 }
 
 export default app
