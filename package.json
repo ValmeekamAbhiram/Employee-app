@@ -1,0 +1,13 @@
+{
+  "name": "mern-mini-root",
+  "version": "1.0.0",
+  "description": "Root configuration for mern-mini deployment",
+  "scripts": {
+    "start": "node backend/server.js",
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "build-frontend": "cd frontend && npm run build",
+    "build": "npm run build-frontend",
+    "postinstall": "npm run install-backend && npm run install-frontend && npm run build-frontend"
+  }
+}

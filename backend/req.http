@@ -1,0 +1,33 @@
+### Create employee
+POST http://localhost:4000/employee-api/employee
+Content-Type: application/json
+
+{
+    "name":"emp1",
+    "email":"emp1@gmail.com",
+    "mobile":"9999977777",
+    "designation":"Manager",
+    "companyName":"JPMC"
+}
+###
+
+### Get all employees
+GET http://localhost:4000/employee-api/employee
+###
+
+### Get employee by id
+GET http://localhost:4000/employee-api/employee/69ca28d141d5a9360f542d0a
+###
+
+### Update employee
+PUT http://localhost:4000/employee-api/employee/69ca28d141d5a9360f542d0a
+Content-Type: application/json
+
+{
+    "name":"employee1",
+    "email":"emp1@gmail.com"
+}
+###
+### Delete employee
+DELETE http://localhost:4000/employee-api/employee/69ca28d141d5a9360f542d0a
+###
